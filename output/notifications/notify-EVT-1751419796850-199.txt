@@ -1,0 +1,1 @@
+🎮 Notification for Player_Omega: 🎉 ¡LOGRO DESBLOQUEADO! {"eventId":"EVT-1751419796850-199","eventType":"KILL","playerId":"Player_Omega","timestamp":1751419796850,"eventData":{"weapon":"M4A1","headshot":true,"victim":"Player_Alpha"}}
