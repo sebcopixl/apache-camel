@@ -1,0 +1,1 @@
+🎮 Notification for Player_Delta: 🎉 ¡LOGRO DESBLOQUEADO! {"eventId":"EVT-1751929298521-879","eventType":"KILL","playerId":"Player_Delta","timestamp":1751929298521,"eventData":{"weapon":"AWP","headshot":true,"victim":"Player_Beta"}}

@@ -21,7 +21,10 @@ public class CamelApplication {
         // main.configure().addRoutesBuilder(new ClaimCheckRouteBuilder());
 
         // EVENT SOURCING + SEDA GAMING PATTERN - Descomenta para probar
-        main.configure().addRoutesBuilder(new EventSourcingGameRouteBuilder());
+        // main.configure().addRoutesBuilder(new EventSourcingGameRouteBuilder());
+
+        // SIMULADOR SIPAP - Sistema de transferencias electrónicas
+        main.configure().addRoutesBuilder(new SipapTransferRouteBuilder());
 
         // Start and keep the application running
         main.run(args);

@@ -1,0 +1,1 @@
+🎮 Notification for Player_Gamma: 🎉 ¡LOGRO DESBLOQUEADO! {"eventId":"EVT-1751927662819-416","eventType":"KILL","playerId":"Player_Gamma","timestamp":1751927662819,"eventData":{"weapon":"M4A1","headshot":false,"victim":"Player_Gamma"}}
