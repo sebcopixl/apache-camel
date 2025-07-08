@@ -1,13 +1,17 @@
 package org.example;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.broker.BrokerService;
+import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.activemq.ActiveMQComponent;
 import java.util.Random;
 
 /**
- * Simulador del sistema SIPAP - Transferencias electrónicas
+ * Simulador del sistema SIPAP con ActiveMQ embebido
  * Simula transferencias entre bancos ITAU, ATLAS, FAMILIAR
  */
-public class SipapTransferRouteBuilder extends RouteBuilder {
+public class SipapActiveMQRouteBuilder extends RouteBuilder {
 
     private Random random = new Random();
     private String[] bancos = {"ITAU", "ATLAS", "FAMILIAR"};
@@ -15,6 +19,9 @@ public class SipapTransferRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+
+        // Configurar conexión a ActiveMQ en Docker
+        setupDockerActiveMQ();
 
         // ============================================
         // GENERADOR DE TRANSFERENCIAS (Timer)
@@ -45,18 +52,18 @@ public class SipapTransferRouteBuilder extends RouteBuilder {
                 .log("Generando transferencia: ${body}")
                 .choice()
                 .when(header("bancoDestino").isEqualTo("ITAU"))
-                .to("seda:" + apellidoAlumno + "-ITAU-IN")
+                .to("activemq:queue:" + apellidoAlumno + "-ITAU-IN")
                 .when(header("bancoDestino").isEqualTo("ATLAS"))
-                .to("seda:" + apellidoAlumno + "-ATLAS-IN")
+                .to("activemq:queue:" + apellidoAlumno + "-ATLAS-IN")
                 .when(header("bancoDestino").isEqualTo("FAMILIAR"))
-                .to("seda:" + apellidoAlumno + "-FAMILIAR-IN");
+                .to("activemq:queue:" + apellidoAlumno + "-FAMILIAR-IN");
 
         // ============================================
         // CONSUMIDORES DE CADA BANCO
         // ============================================
 
         // Consumidor Banco ITAU
-        from("seda:" + apellidoAlumno + "-ITAU-IN")
+        from("activemq:queue:" + apellidoAlumno + "-ITAU-IN")
                 .routeId("consumidor-itau")
                 .log("BANCO ITAU procesando transferencia: ${body}")
                 .process(exchange -> {
@@ -67,7 +74,7 @@ public class SipapTransferRouteBuilder extends RouteBuilder {
                 });
 
         // Consumidor Banco ATLAS
-        from("seda:" + apellidoAlumno + "-ATLAS-IN")
+        from("activemq:queue:" + apellidoAlumno + "-ATLAS-IN")
                 .routeId("consumidor-atlas")
                 .log("BANCO ATLAS procesando transferencia: ${body}")
                 .process(exchange -> {
@@ -78,7 +85,7 @@ public class SipapTransferRouteBuilder extends RouteBuilder {
                 });
 
         // Consumidor Banco FAMILIAR
-        from("seda:" + apellidoAlumno + "-FAMILIAR-IN")
+        from("activemq:queue:" + apellidoAlumno + "-FAMILIAR-IN")
                 .routeId("consumidor-familiar")
                 .log("BANCO FAMILIAR procesando transferencia: ${body}")
                 .process(exchange -> {
@@ -87,5 +94,22 @@ public class SipapTransferRouteBuilder extends RouteBuilder {
                     System.out.println("Transacción completada en FAMILIAR");
                     System.out.println("=========================");
                 });
+    }
+
+    /**
+     * Configura conexión a ActiveMQ corriendo en Docker
+     */
+    private void setupDockerActiveMQ() throws Exception {
+        CamelContext context = getContext();
+
+        // Configurar componente ActiveMQ para conectar al Docker
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        ActiveMQComponent activeMQComponent = new ActiveMQComponent();
+        activeMQComponent.setConnectionFactory(connectionFactory);
+
+        context.addComponent("activemq", activeMQComponent);
+
+        System.out.println("✅ Conectado a ActiveMQ en Docker (localhost:61616)");
+        System.out.println("📊 Web Console disponible en: http://localhost:8161");
     }
 }

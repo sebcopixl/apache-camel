@@ -1,17 +1,16 @@
-package org.example;
+package org.example.project_1;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.activemq.ActiveMQComponent;
 import java.util.Random;
 
 /**
- * Simulador del sistema SIPAP con ActiveMQ embebido
+ * Simulador del sistema SIPAP con ActiveMQ en Docker
  * Simula transferencias entre bancos ITAU, ATLAS, FAMILIAR
  */
-public class SipapActiveMQRouteBuilder extends RouteBuilder {
+public class SipapDockerActiveMQRouteBuilder extends RouteBuilder {
 
     private Random random = new Random();
     private String[] bancos = {"ITAU", "ATLAS", "FAMILIAR"};
@@ -20,8 +19,8 @@ public class SipapActiveMQRouteBuilder extends RouteBuilder {
     @Override
     public void configure() throws Exception {
 
-        // Configurar ActiveMQ embebido
-        setupEmbeddedActiveMQ();
+        // Configurar conexión a ActiveMQ en Docker
+        setupDockerActiveMQ();
 
         // ============================================
         // GENERADOR DE TRANSFERENCIAS (Timer)
@@ -97,25 +96,23 @@ public class SipapActiveMQRouteBuilder extends RouteBuilder {
     }
 
     /**
-     * Configura ActiveMQ embebido para que no necesites instalación externa
+     * Configura conexión a ActiveMQ corriendo en Docker
      */
-    private void setupEmbeddedActiveMQ() throws Exception {
+    private void setupDockerActiveMQ() throws Exception {
         CamelContext context = getContext();
 
-        // Crear broker ActiveMQ embebido
-        BrokerService broker = new BrokerService();
-        broker.setBrokerName("EmbeddedBroker");
-        broker.addConnector("tcp://localhost:61616");
-        broker.setPersistent(false); // No persistir datos
-        broker.start();
-
-        // Configurar componente ActiveMQ
+        // Configurar componente ActiveMQ para conectar al Docker con credenciales
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        connectionFactory.setUserName("artemis");
+        connectionFactory.setPassword("artemis");
+
         ActiveMQComponent activeMQComponent = new ActiveMQComponent();
         activeMQComponent.setConnectionFactory(connectionFactory);
 
         context.addComponent("activemq", activeMQComponent);
 
-        System.out.println("✅ ActiveMQ embebido iniciado en tcp://localhost:61616");
+        System.out.println("✅ Conectado a ActiveMQ en Docker (localhost:61616)");
+        System.out.println("📊 Web Console disponible en: http://localhost:8161");
+        System.out.println("🔐 Usuario: artemis / Password: artemis");
     }
 }
